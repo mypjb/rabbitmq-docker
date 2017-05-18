@@ -15,7 +15,7 @@ RUN curl -s https://packagecloud.io/install/repositories/rabbitmq/rabbitmq-serve
 ENV RABBITMQ_BASE /usr/local/rabbitmq
 
 #conf dir
-ENV RABBITMQ_CONFIG_FILE $RABBITMQ_BASE/conf
+ENV RABBITMQ_CONFIG_FILE $RABBITMQ_BASE/conf/rabbitmq
 
 # persistent
 ENV RABBITMQ_MNESIA_BASE $RABBITMQ_BASE/mnesia
@@ -26,17 +26,15 @@ ENV RABBITMQ_LOG_BASE $RABBITMQ_BASE/log
 #enabled plugins log
 ENV RABBITMQ_ENABLED_PLUGINS_FILE $RABBITMQ_BASE/enabled_plugins
 
-ENV RABBITMQ_URL https://github.com/mypjb/rabbitmq-docker.git
+COPY conf $RABBITMQ_BASE/conf
 
 RUN mkdir -p $RABBITMQ_BASE \
-	&& chmod -R 777 $RABBITMQ_BASE
+	&& cat /etc/passwd \
+	&& chown -R rabbitmq $RABBITMQ_BASE
 
-RUN yum install -y git \
-	&& git clone $RABBITMQ_URL git \
-	&& cp git/conf $RABBITMQ_BASE \
-	&& rm -rf git
 
 EXPOSE 15672 5672 5671 4369
 
 CMD 	rabbitmq-plugins enable rabbitmq_management ; \
-	rabbitmq-server ; /bin/bash ;
+	rabbitmq-server -detached ; \
+	/bin/bash ;
